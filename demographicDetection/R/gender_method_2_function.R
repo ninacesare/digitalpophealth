@@ -32,7 +32,7 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
   if(labeled == FALSE){
 
-    #load("/DATA/genderMethod2_mod.rda")
+    #load("/DATA/genderMethod2_mod.rda") # need to load this
     print("Classifier is trained!")
 
     if(chunk == FALSE){
@@ -102,7 +102,7 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
       ## Generate predictions
       input_part <- input[which(is.na(input$gender_new)),]
-      predictions <- predict(mod, input_part)
+      predictions <- predict(mod2, input_part)
       predictions<-as.character(predictions)
 
       results <- data.frame(id_str=input_part$id_str, gender_prediction =as.character(predictions))
@@ -196,7 +196,7 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
         ## Generate predictions
         sub_part <- sub[which(is.na(sub$gender_new)),]
-        predictions <- predict(mod, sub_part)
+        predictions <- predict(mod2, sub_part)
 
         print(paste0("Predictions for chunk ", iter , " are made!"))
 
@@ -285,7 +285,7 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
         ## Generate predictions
         sub_part <- sub[which(is.na(sub$gender_new)),]
-        predictions <- predict(mod, sub_part)
+        predictions <- predict(mod2, sub_part)
 
         print(paste0("Predictions for chunk ", iter , " are made!"))
 
