@@ -1,6 +1,6 @@
 #' Predict gender using name word and character n-grams
 #'
-#' This function does the following  1.) Take input data (as a data frame) 2.) Train a classifier using Kaggle data  3.) Generates predictions from the input data and classifier
+#' This function pulls account information from the Twitter API. It is adapted from code authored by Dr. Sean Fitzhugh and Dr. Emma Spiro
 #' @param user_ids A vector of Twitter user ID values or screen names 
 #' @param credential Your API authentication token
 #' @param rawdata Whether you want to store the raw .json output
@@ -15,6 +15,7 @@
 
 #############  Information from individual accounts  ###############
 
+
 get_user_info <- function(user_ids, credential=NULL, rawdata=FALSE, datadir="", is_id=""){
   cat("WORKING TO GET USER DATA...")
   runs <- ceiling(length(user_ids)/100) # num of queries needed 
@@ -27,7 +28,7 @@ get_user_info <- function(user_ids, credential=NULL, rawdata=FALSE, datadir="", 
   rawData <- rawdata
   dataDir <- datadir
   is_ID <- is_id
-
+  
   
   if (runs==1)
     if(length(user_ids)<end)
@@ -56,12 +57,13 @@ get_user_info <- function(user_ids, credential=NULL, rawdata=FALSE, datadir="", 
     
     start <- end + 1  
     end <- start + 99
-
-    cat(".")
+    
+    cat(paste0("staring at ", end, "..."))  #CHANGED UPDATE MESSAGE 1/11/18
   }
   cat("done.\n")
   return(uInfo)
 }
+
 
 
 
