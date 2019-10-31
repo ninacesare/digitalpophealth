@@ -32,12 +32,10 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
   if(labeled == FALSE){
 
-    #load("/DATA/genderMethod2_mod.rda") # need to load this
     print("Classifier is trained!")
 
     if(chunk == FALSE){
 
-      #load("/DATA/gender_training_premade.rda")
       df <- df_gen
 
       index1 <- which(colnames(input)=="id_str")
@@ -138,7 +136,6 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
         sub$name <- as.character(sub$name)
 
-        #load("/DATA/gender_training_premade.rda")
         df <- df_gen
 
         sub <- rbind(df, sub)
@@ -233,7 +230,6 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
         sub$name <- as.character(sub$name)
 
-        #load("/DATA/gender_training_premade.rda")
         df <- df_gen
 
         sub <- rbind(df, sub)

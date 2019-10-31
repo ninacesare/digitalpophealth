@@ -16,7 +16,6 @@
 
 ensemble_predict<-function(input){
 
-    #load("DATA/gender_ensemble_mod_data.rda")
 
     ground_truth$gender_new_2<-ground_truth$gender_new
     ground_truth$gender_new_2[ground_truth$gender_new=="female"]<-1
