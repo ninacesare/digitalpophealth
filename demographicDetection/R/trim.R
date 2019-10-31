@@ -1,11 +1,11 @@
 #' Trim trailing and leading whitespace from a string
 #'
 #' Trim trailing and leading whitespace from a string
-#' @param x a string value
+#' @param x A string value
 #' @keywords text
 #' @return A trimmed sentence
-#' @export 
-#' @examples 
+#' @export
+#' @examples
 #' trim(" Trim this sentence ")
 
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)

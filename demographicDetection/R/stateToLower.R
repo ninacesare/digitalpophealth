@@ -1,11 +1,11 @@
-#' Abbreviate state names 
+#' Abbreviate state names
 #'
 #' Convert full state names to abbreviations
 #' @param X A string representing a state name (i.e. "Alaska")
 #' @keywords geolocation, state
-#' @return refac.x Abbreviated state name
+#' @return Abbreviated state name
 #' @export
-#' @examples 
+#' @examples
 #' stateToLower("Alaska")
 #' @seealso Code written by Christopher O'Brien, retrieved from: https://favorableoutcomes.wordpress.com/tag/state/
 

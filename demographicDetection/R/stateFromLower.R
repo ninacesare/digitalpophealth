@@ -1,11 +1,11 @@
-#' Lengthen state abbreviations 
+#' Lengthen state abbreviations
 #'
-#' Convert abbreviated state names to full state names. Retrieved from:  Retrieved from: https://favorableoutcomes.wordpress.com/tag/state/ 
+#' Convert abbreviated state names to full state names. Retrieved from:  Retrieved from: https://favorableoutcomes.wordpress.com/tag/state/
 #' @param x A string representing a state name abbreviation (i.e. "AK")
-#' @keywords geolocation 
-#' @return refac.x A full state name 
+#' @keywords geolocation
+#' @return A full state name
 #' @export
-#' @examples 
+#' @examples
 #' stateFromLower("AK")
 #' @seealso Code written by Christopher O'Brien, retrieved from: https://favorableoutcomes.wordpress.com/tag/state/
 
@@ -34,6 +34,6 @@ stateFromLower <-function(x) {
   refac.x<-st.codes$full[match(st.x$state,st.codes$state)]
   #return the full state names in the same order in which they appeared in the original source
   return(refac.x)
-  
+
 }
 
