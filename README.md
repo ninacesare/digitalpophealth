@@ -11,6 +11,13 @@ To this end, we will develop a process to assess the comprehensiveness and quali
 
 
 Publications
+Cesare N, Grant C, Nsoesie EO. Detection of User Demographics on Social Media: A Review of Methods and Recommendations for Best Practices. CoRR [Internet]. 2017;abs/1702.01807. Available from: http://arxiv.org/abs/1702.01807
+
+Cesare N, Grant C, Hawkins JB, Brownstein JS, Nsoesie EO. Demographics in Social Media Data for Public Health Research: Does it matter? CoRR [Internet]. 2017;abs/1710.11048. Available from: http://arxiv.org/abs/1710.11048
+
+Cesare, N, Nguyen QC, Grant C, Nsoesie EO. Social Media Captures Demographic and Regional Physical Activity. BMJ Open Sport & Exercise Medicine.  2019. 5(1). DOI: 0.1136/bmjsem-2019-000567.
+
+Cesare N, Dwivedi P, Nguyen Q, Nsoesie EO. Use of Social Media, Search Queries and Demographic Data to Assess Obesity Prevalence in the United States. Palgrave Communications. 2019. 5(106). 1-9.
 
 Cesare N, Grant C, Hawkins JB, Brownstein JS, Nsoesie EO. Demographics in Social Media Data for Public Health Research: Does it matter?. arXiv preprint arXiv:1710.11048. 2017 Oct 30.
 
@@ -22,9 +29,6 @@ Nsoesie EO, Flor LS, Maharana A, Hawkins JB, Skotnes T, Marinho F, Brownstein JS
 
 
 
-Code 
-
-Coming soon ... 
 
 
 Funding
