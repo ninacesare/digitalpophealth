@@ -109,21 +109,20 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
       name_IDX<-grep("_name", colnames(input))
 
-      train <- input[which(!is.na(input$gender_new)),]
-      test <- input[which(is.na(input$gender_new)),]
-
+      input_train <- input[which(!is.na(input$gender_new)),]
+      input_test <- input[which(is.na(input$gender_new)),]
 
       trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
       set.seed(seed)
 
       print("Classifier is being trained. Please be patient - this may take some time.")
-      mod2 <- train(gender_new ~., data=train[,c(2, name_IDX)], method = "svmLinear", trControl=trctrl)
+      mod2 <- train(gender_new ~., data=input_train[,c(2, name_IDX)], method = "svmLinear", trControl=trctrl)
       print("Classifier is trained!")
 
-      predictions <- predict(mod2, input_part)
+      predictions <- predict(mod2, input_test)
       predictions<-as.character(predictions)
 
-      results <- data.frame(id_str=input_part$id_str, gender_prediction =as.character(predictions))
+      results <- data.frame(id_str=input_test$id_str, gender_prediction =as.character(predictions))
 
       return(results)
       print("Predictions are made!")
@@ -138,6 +137,8 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
       gender_new  <-  rep(NA, dim(input)[1])
       input  <-  as.data.frame(cbind(input[,c(index1)], gender_new, input[,c(index2)]))
       names(input)  <-  c("id_str", "gender_new", "name")
+
+      df_gen_save <- df_gen
 
       df_gen$name <- as.character(df_gen$name)
       df_gen$name <- unlist(lapply(df_gen$name, function(x) iconv(x,"UTF-8","ASCII")))
@@ -191,7 +192,7 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
       set.seed(seed)
 
       print("Classifier is being trained. Please be patient - this may take some time.")
-      mod2 <- train(gender_new ~., data=df_gen[,c(1, name_IDX)], method = "svmLinear", trControl=trctrl)
+      mod2 <- train(gender_new ~., data=df_gen[,c(2, name_IDX)], method = "svmLinear", trControl=trctrl)
       print("Classifier is trained!")
 
       vec <- seq(1, nrow(input), by=10000)
@@ -204,16 +205,11 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
         iter <- iter+1
 
         sub <- input[c(i:(i+9999)),]
+        sub <- rbind(sub, df_gen_save)
 
-        if(length(which(is.na(sub$name)))>0){
-          sub <- sub[-which(is.na(sub$name)),]
-        }
+        sub <- sub[which(!is.na(sub$name)),]
 
         sub$name <- as.character(sub$name)
-
-        df <- df_gen
-
-        sub <- rbind(df, sub)
 
         sub$name <- as.character(sub$name)
         sub$name <- unlist(lapply(sub$name, function(x) iconv(x,"UTF-8","ASCII")))
@@ -288,6 +284,8 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
       input  <-  as.data.frame(cbind(input[,c(index1)], gender_new, input[,c(index2)]))
       names(input)  <-  c("id_str", "gender_new", "name")
 
+      df_gen_save <- df_gen
+
       df_gen$name <- as.character(df_gen$name)
       df_gen$name <- unlist(lapply(df_gen$name, function(x) iconv(x,"UTF-8","ASCII")))
       df_gen$name <- unlist(lapply(df_gen$name, function(x) gsub("<", " <", x)))
@@ -353,16 +351,11 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
         iter <- iter+1
 
         sub <- input[c(i:(i+9999)),]
+        sub <- rbind(sub, df_gen_save)
 
-        if(length(which(is.na(sub$name)))>0){
-          sub <- sub[-which(is.na(sub$name)),]
-        }
+        sub <- sub[which(!is.na(sub$name)),]
 
         sub$name <- as.character(sub$name)
-
-        df <- df_gen
-
-        sub <- rbind(df, sub)
 
         sub$name <- as.character(sub$name)
         sub$name <- unlist(lapply(sub$name, function(x) iconv(x,"UTF-8","ASCII")))
@@ -411,8 +404,8 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
         ## Generate predictions
         sub_part <- sub[which(is.na(sub$gender_new)),]
-        predictions <- predict(mod2, sub_part)
 
+        predictions <- predict(mod2, sub)
         print(paste0("Predictions for chunk ", iter , " are made!"))
 
         predictions<-as.character(predictions)
