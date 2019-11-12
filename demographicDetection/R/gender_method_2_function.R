@@ -138,20 +138,61 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
       gender_new  <-  rep(NA, dim(input)[1])
       input  <-  as.data.frame(cbind(input[,c(index1)], gender_new, input[,c(index2)]))
       names(input)  <-  c("id_str", "gender_new", "name")
-      
-      
-      ## FIX
-      
+
+      df_gen$name <- as.character(df_gen$name)
+      df_gen$name <- unlist(lapply(df_gen$name, function(x) iconv(x,"UTF-8","ASCII")))
+      df_gen$name <- unlist(lapply(df_gen$name, function(x) gsub("<", " <", x)))
+      df_gen$name <- unlist(lapply(df_gen$name, function(x) gsub(">", "> ", x)))
+      df_gen$name <- unlist(lapply(df_gen$name, function(x) str_replace_all(x,"\\<U[^\\>]*\\>","")))
+      df_gen$name<-str_replace_all(df_gen$name, "[[:punct:]]", "")
+      df_gen$name<-trim(tolower(df_gen$name))
+
+      ## Feature 1: making user name n-gram features
+
+      name_gram<-unlist(lapply(df_gen$name, function(x) strsplit(gsub("[^[:alnum:] ]", "", x), " +")[[1]]))
+
+      dat<-as.data.frame(table(name_gram))
+      dat<-dat[which(dat$Freq>2),]
+      colNames<-as.character(dat$name_gram)
+      colNames<-colNames[-which(colNames=="")]
+      colNames<-unlist(lapply(colNames, function(x) paste(x, "nameGram", sep="_")))
+
+      df_gen[,c(colNames)]<-0
+
+      for(i in (dim(df_gen)[2]-(length(colNames)-1)):dim(df_gen)[2]){
+        word<-colnames(df_gen)[i]
+        word<-gsub("_nameGram", "", word)
+        df_gen[grep(word, df_gen$name, ignore.case = TRUE), i]<-1
+      }
+
+      ### Feature 2: making user name n-char features
+
+      name_char<-unlist(lapply(df_gen$name, function(x) gsub(" ", "", x)))
+      name_char<-unlist(lapply(name_char, function(x) unlist(strsplit(x, ""))))
+
+      dat<-as.data.frame(table(name_char))
+      dat<-dat[which(dat$Freq>2),]
+      colNames<-as.character(dat$name_char)
+      colNames<-unlist(lapply(colNames, function(x) paste(x, "nameChar", sep="_")))
+
+      df_gen[,c(colNames)]<-0
+
+      for(i in (dim(df_gen)[2]-(length(colNames)-1)):dim(df_gen)[2]){
+        word<-colnames(df_gen)[i]
+        word<-gsub("_nameChar", "", word)
+        df_gen[grep(word, df_gen$name, fixed=TRUE), i]<-1
+      }
+
+      print("Features are built!")
+
+      name_IDX <- grep("_name", colnames(df_gen))
+
       trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
       set.seed(seed)
-      
+
       print("Classifier is being trained. Please be patient - this may take some time.")
-      mod2 <- train(gender_new ~., data=train[,c(1, name_IDX)], method = "svmLinear", trControl=trctrl)
+      mod2 <- train(gender_new ~., data=df_gen[,c(1, name_IDX)], method = "svmLinear", trControl=trctrl)
       print("Classifier is trained!")
-      
-      
-      
-      
 
       vec <- seq(1, nrow(input), by=10000)
 
@@ -246,6 +287,61 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
       gender_new  <-  rep(NA, dim(input)[1])
       input  <-  as.data.frame(cbind(input[,c(index1)], gender_new, input[,c(index2)]))
       names(input)  <-  c("id_str", "gender_new", "name")
+
+      df_gen$name <- as.character(df_gen$name)
+      df_gen$name <- unlist(lapply(df_gen$name, function(x) iconv(x,"UTF-8","ASCII")))
+      df_gen$name <- unlist(lapply(df_gen$name, function(x) gsub("<", " <", x)))
+      df_gen$name <- unlist(lapply(df_gen$name, function(x) gsub(">", "> ", x)))
+      df_gen$name <- unlist(lapply(df_gen$name, function(x) str_replace_all(x,"\\<U[^\\>]*\\>","")))
+      df_gen$name<-str_replace_all(df_gen$name, "[[:punct:]]", "")
+      df_gen$name<-trim(tolower(df_gen$name))
+
+      ## Feature 1: making user name n-gram features
+
+      name_gram<-unlist(lapply(df_gen$name, function(x) strsplit(gsub("[^[:alnum:] ]", "", x), " +")[[1]]))
+
+      dat<-as.data.frame(table(name_gram))
+      dat<-dat[which(dat$Freq>2),]
+      colNames<-as.character(dat$name_gram)
+      colNames<-colNames[-which(colNames=="")]
+      colNames<-unlist(lapply(colNames, function(x) paste(x, "nameGram", sep="_")))
+
+      df_gen[,c(colNames)]<-0
+
+      for(i in (dim(df_gen)[2]-(length(colNames)-1)):dim(df_gen)[2]){
+        word<-colnames(df_gen)[i]
+        word<-gsub("_nameGram", "", word)
+        df_gen[grep(word, df_gen$name, ignore.case = TRUE), i]<-1
+      }
+
+      ### Feature 2: making user name n-char features
+
+      name_char<-unlist(lapply(df_gen$name, function(x) gsub(" ", "", x)))
+      name_char<-unlist(lapply(name_char, function(x) unlist(strsplit(x, ""))))
+
+      dat<-as.data.frame(table(name_char))
+      dat<-dat[which(dat$Freq>2),]
+      colNames<-as.character(dat$name_char)
+      colNames<-unlist(lapply(colNames, function(x) paste(x, "nameChar", sep="_")))
+
+      df_gen[,c(colNames)]<-0
+
+      for(i in (dim(df_gen)[2]-(length(colNames)-1)):dim(df_gen)[2]){
+        word<-colnames(df_gen)[i]
+        word<-gsub("_nameChar", "", word)
+        df_gen[grep(word, df_gen$name, fixed=TRUE), i]<-1
+      }
+
+      print("Features are built!")
+
+      name_IDX <- grep("_name", colnames(df_gen))
+
+      trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+      set.seed(seed)
+
+      print("Classifier is being trained. Please be patient - this may take some time.")
+      mod2 <- train(gender_new ~., data=df_gen[,c(1, name_IDX)], method = "svmLinear", trControl=trctrl)
+      print("Classifier is trained!")
 
       vec <- seq(1, nrow(input), by=10000)
 
