@@ -405,7 +405,7 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
         ## Generate predictions
         sub_part <- sub[which(is.na(sub$gender_new)),]
 
-        predictions <- predict(mod2, sub)
+        predictions <- predict(mod2, sub_part)
         print(paste0("Predictions for chunk ", iter , " are made!"))
 
         predictions<-as.character(predictions)
