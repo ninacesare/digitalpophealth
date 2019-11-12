@@ -26,17 +26,23 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
     stop("Your input data is missing relevant field(s)")
   }
 
+
+  if(is.null(input$id_str) & is.null(input$user_id)){
+    stop("Your data are missing relevant field(s)")
+  }
+
+  if(!is.null(input$user_id)){
+    names(input)[grep("user_id", colnames(input))] <- "id_str"
+  }
+
+
   if(tail(unlist(strsplit(dir, "")), 1) !="/"){
      dir <- paste0(dir, "/")
   }
 
   if(labeled == FALSE){
 
-    print("Classifier is trained!")
-
     if(chunk == FALSE){
-
-      df <- df_gen
 
       index1 <- which(colnames(input)=="id_str")
       index2 <- which(colnames(input)=="name")
@@ -44,8 +50,11 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
       gender_new  <-  rep(NA, dim(input)[1])
       input  <-  as.data.frame(cbind(input[,c(index1)], gender_new, input[,c(index2)]))
       names(input)  <-  c("id_str", "gender_new", "name")
+      input <- rbind(input, df_gen)
 
-      input <- rbind(df, input)
+      input$id_str <- as.character(input$id_str)
+      input$name <- as.character(input$name)
+
 
       ## Start building features
 
@@ -98,8 +107,19 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
 
       print("Features are built!")
 
-      ## Generate predictions
-      input_part <- input[which(is.na(input$gender_new)),]
+      name_IDX<-grep("_name", colnames(input))
+
+      train <- input[which(!is.na(input$gender_new)),]
+      test <- input[which(is.na(input$gender_new)),]
+
+
+      trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+      set.seed(seed)
+
+      print("Classifier is being trained. Please be patient - this may take some time.")
+      mod2 <- train(gender_new ~., data=train[,c(2, name_IDX)], method = "svmLinear", trControl=trctrl)
+      print("Classifier is trained!")
+
       predictions <- predict(mod2, input_part)
       predictions<-as.character(predictions)
 
@@ -118,6 +138,20 @@ gender_method_2 <- function(input, labeled=FALSE, set.seed=NULL, training_set=0.
       gender_new  <-  rep(NA, dim(input)[1])
       input  <-  as.data.frame(cbind(input[,c(index1)], gender_new, input[,c(index2)]))
       names(input)  <-  c("id_str", "gender_new", "name")
+      
+      
+      ## FIX
+      
+      trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+      set.seed(seed)
+      
+      print("Classifier is being trained. Please be patient - this may take some time.")
+      mod2 <- train(gender_new ~., data=train[,c(1, name_IDX)], method = "svmLinear", trControl=trctrl)
+      print("Classifier is trained!")
+      
+      
+      
+      
 
       vec <- seq(1, nrow(input), by=10000)
 

@@ -22,18 +22,24 @@
 gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=0.80, chunk=FALSE, action="append", dir=NULL){
   Sys.setlocale("LC_ALL", "C")
 
-
   if(tail(unlist(strsplit(dir, "")), 1) !="/"){
     dir <- paste0(dir, "/")
   }
 
   if(is.null(input$name)){
-    stop("Your data is missing relevant field(s)")
+    stop("Your data are missing relevant field(s)")
   }
 
-  if(labeled == FALSE){
+  if(is.null(input$id_str) & is.null(input$user_id)){
+    stop("Your data are missing relevant field(s)")
+  }
 
-    print("Classifier is trained!")
+  if(!is.null(input$user_id)){
+    names(input)[grep("user_id", colnames(input))] <- "id_str"
+  }
+
+
+  if(labeled == FALSE){
 
     if(chunk==FALSE){
 
@@ -43,11 +49,12 @@ gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=
       gender_new  <-  rep(NA, dim(input)[1])
       input  <-  as.data.frame(cbind(input[,c(index1)], gender_new, input[,c(index2)]))
       names(input)  <-  c("id_str", "gender_new", "name")
-      print("Test data are ready!")
+      input <- rbind(input, df_gen)
+      print("Data are ready!")
 
-      input$name_clean <- unlist(lapply(input$name, function(x) convert_names(x)))
+      input$name_clean <- unlist(lapply(input$name, function(x) convert_names(as.character(x))))
 
-      input$end_char <- unlist(lapply(input$name_clean, function(x) end_char(x)))
+      input$end_char <- unlist(lapply(input$name_clean, function(x) end_char(as.character(x))))
 
       for(i in 1:dim(input)[1]){
         if(!is.na(input$name_clean[i])){
@@ -71,12 +78,17 @@ gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=
       input$kiki_v <- unlist(lapply(input$name_clean, function(x) length(c(grep("i", unlist(strsplit(x, ""))), grep("e", unlist(strsplit(x, "")))))))
       print("Features are built!")
 
-      predictions  <-  predict(mod3, input)$class
+      train <- input[which(!is.na(input$gender_new)),]
+      test <- input[which(is.na(input$gender_new)),]
+
+      mod3 <- CoreModel(as.factor(gender_new) ~ syllables+vowel_count+consonant_count+end_char+bouba_c+bouba_v+kiki_c+kiki_v, data=train, model="tree")
+      print("Classifier is trained!")
+
+
+      predictions  <-  predict(mod3, test)$class
       print("Predictions are made!")
 
-      results <- as.data.frame(cbind(test, as.character(predictions)))
-      names(results)[dim(results)[2]]<-"gender_prediction"
-
+      results <- data.frame(id_str=as.character(test$id_str), gender_prediction=predictions)
       return(results)
 
     }
@@ -91,7 +103,7 @@ gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=
       names(input)  <-  c("id_str", "gender_new", "name")
       print("Test data are ready!")
 
-      vec <- seq(1, nrow(input), by=10000)
+      vec <- seq(1, nrow(input), by=1000)
       iter <- 0
 
       results <- NULL
@@ -100,11 +112,10 @@ gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=
 
         iter <- iter+1
 
-        sub <- input[(i:(i+9999)),]
+        sub <- input[(i:(i+999)),]
+        sub <- sub[which(!is.na(sub$name)),]
+        sub <- rbind(sub, df_gen)
 
-        if(length(which(is.na(sub$name)))>0){
-          sub <- sub[-which(is.na(sub$name)),]
-        }
 
         sub$name <- as.character(sub$name)
         sub$name_clean <- unlist(lapply(sub$name, function(x) convert_names(x)))
@@ -128,13 +139,18 @@ gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=
         sub$kiki_v <- unlist(lapply(sub$name_clean, function(x) length(c(grep("i", unlist(strsplit(x, ""))), grep("e", unlist(strsplit(x, "")))))))
         print(paste0("Features for chunk ", iter , " are made!"))
 
-        predictions <- predict(mod3, sub)$class
+        sub_train <- sub[which(!is.na(sub$gender_new)),]
+        sub_test <- sub[which(is.na(sub$gender_new)),]
+
+        mod3 <- CoreModel(as.factor(gender_new) ~ syllables+vowel_count+consonant_count+end_char+bouba_c+bouba_v+kiki_c+kiki_v, data=sub_train, model="tree")
+
+        predictions <- predict(mod3, sub_test)$class
 
         print(paste0("Predictions for chunk ", iter , " are made!"))
 
         predictions<-as.character(predictions)
 
-        results_part <- data.frame(id_str=as.character(sub$id_str), gender_prediction=predictions)
+        results_part <- data.frame(id_str=as.character(sub_test$id_str), gender_prediction=predictions)
 
         results <- rbind(results, results_part)
       }
@@ -151,7 +167,7 @@ gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=
       names(input)  <-  c("id_str", "gender_new", "name")
       print("Test data are ready!")
 
-      vec <- seq(1, nrow(input), by=10000)
+      vec <- seq(1, nrow(input), by=1000)
 
       results <- NULL
       iter <- 0
@@ -160,16 +176,15 @@ gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=
 
         iter <- iter+1
 
-        sub <- input[(i:(i+9999)),]
+        sub <- input[(i:(i+999)),]
+        sub <- sub[which(!is.na(sub$name)),]
 
-        if(length(which(is.na(sub$name)))>0){
-          sub <- sub[-which(is.na(sub$name)),]
-        }
+        sub <- rbind(sub, df_gen)
 
         sub$name <- as.character(sub$name)
-        sub$name_clean <- unlist(lapply(sub$name, function(x) convert_names(x)))
+        sub$name_clean <- unlist(lapply(sub$name, function(x) convert_names(as.character(x))))
 
-        sub$end_char <- unlist(lapply(sub$name_clean, function(x) end_char(x)))
+        sub$end_char <- unlist(lapply(sub$name_clean, function(x) end_char(as.character(x))))
 
         for(i in 1:dim(sub)[1]){
           if(!is.na(sub$name_clean[i])){
@@ -188,13 +203,18 @@ gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=
         sub$kiki_v <- unlist(lapply(sub$name_clean, function(x) length(c(grep("i", unlist(strsplit(x, ""))), grep("e", unlist(strsplit(x, "")))))))
         print(paste0("Features for chunk ", iter , " are made!"))
 
-        predictions <- predict(mod3, sub)$class
+        sub_train <- sub[which(!is.na(sub$gender_new)),]
+        sub_test <- sub[which(is.na(sub$gender_new)),]
+
+        mod3 <- CoreModel(as.factor(gender_new) ~ syllables+vowel_count+consonant_count+end_char+bouba_c+bouba_v+kiki_c+kiki_v, data=sub_train, model="tree")
+
+        predictions <- predict(mod3, sub_test)$class
 
         print(paste0("Predictions for chunk ", iter , " are made!"))
 
-        predictions<-as.character(predictions)
+        predictions <- as.character(predictions)
 
-        results_part <- data.frame(id_str=as.character(sub$id_str), gender_prediction=predictions)
+        results_part <- data.frame(id_str=as.character(sub_test$id_str), gender_prediction=predictions)
 
         write.csv(results_part, paste0(dir, "results_part_", iter, ".csv"), row.names=FALSE)
       }
@@ -234,7 +254,7 @@ gender_method_3  <-  function(input, labeled=FALSE, set.seed=NULL, training_set=
     train<-df[tindex,]
     test<-df[-tindex,]
 
-    mod3 <- Coremodel(as.factor(gender_new) ~ syllables+vowel_count+consonant_count+end_char+bouba_c+bouba_v+kiki_c+kiki_v, data=train, model="tree")
+    mod3 <- CoreModel(as.factor(gender_new) ~ syllables+vowel_count+consonant_count+end_char+bouba_c+bouba_v+kiki_c+kiki_v, data=train, model="tree")
 
     print("Classifier is trained!")
 

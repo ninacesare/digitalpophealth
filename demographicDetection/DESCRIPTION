@@ -33,5 +33,6 @@ Imports:
     ROAuth,
     tm,
     topicmodels,
-    twitteR
-RoxygenNote: 6.1.0.9000
+    twitteR,
+    stopwords
+RoxygenNote: 6.1.99.9001
